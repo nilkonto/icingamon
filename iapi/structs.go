@@ -87,7 +87,7 @@ type HostAttrs struct {
 	CheckCommand string      `json:"check_command,omitempty"`
 	DisplayName  string      `json:"display_name,omitempty"`
 	Groups       []string    `json:"groups,omitempty"`
-	Zone         []string    `json:"zone,omitempty"`
+	Zone         string      `json:"zone,omitempty"`
 	Notes        string      `json:"notes,omitempty"`
 	NotesURL     string      `json:"notes_url,omitempty"`
 	Vars         interface{} `json:"vars,omitempty"`
