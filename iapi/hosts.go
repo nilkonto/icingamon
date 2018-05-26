@@ -41,6 +41,33 @@ func (server *Server) GetHost(hostname string) ([]HostStruct, error) {
 
 }
 
+// DeleteHostByInstanceid ...
+func (server *Server) DeleteHostByInstanceid(intstanceID string) (string, error) {
+
+	payload := map[string]interface{}{
+		"type": "host",
+		// "filter": "host.vars.type==\"AWS\" && host.vars.InstanceId==\"i-0c43eb69dd98ceeac\"",
+		"filter": "host.vars.InstanceId==\"" + intstanceID + "\"",
+	}
+	filterURL := "/objects/hosts?attrs=name"
+	byts, _ := json.Marshal(payload)
+
+	hostname, getError := server.NewAPIRequestFiltered("POST", filterURL, byts)
+
+	if getError != nil {
+		return "", getError
+	}
+
+	delerr := server.DeleteHost(hostname)
+	if delerr != nil {
+		return `Host : ` + hostname + ` couldn't be removed from monitoring.`, delerr
+		//fmt.Println("host not deleted. Error: ", delerr)
+	}
+
+	return `Host : ` + hostname + ` removed from monitoring`, nil
+
+}
+
 // CreateHost ...
 func (server *Server) CreateHost(hostname, address, zone, checkCommand string, variables map[string]string, templates []string) ([]HostStruct, error) {
 

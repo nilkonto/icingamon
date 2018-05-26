@@ -102,6 +102,21 @@ type APIResult struct {
 	Results     interface{} `json:"results"`
 }
 
+// FilteredHostResults ...
+type FilteredHostResults struct {
+	Results []struct {
+		Attrs struct {
+			Name string `json:"name"`
+		} `json:"attrs"`
+		Joins struct {
+		} `json:"joins"`
+		Meta struct {
+		} `json:"meta"`
+		Name string `json:"name"`
+		Type string `json:"type"`
+	} `json:"results"`
+}
+
 // APIStatus stores the results of an Icinga2 API Status Call
 type APIStatus struct {
 	Results []struct {

@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -130,5 +132,54 @@ func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (
 	}
 
 	return &results, nil
+
+}
+
+// NewAPIRequestFiltered ...
+func (server *Server) NewAPIRequestFiltered(method, APICall string, jsonString []byte) (string, error) {
+
+	var hosts FilteredHostResults
+
+	fullURL := server.BaseURL + APICall
+
+	t := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: server.AllowUnverifiedSSL,
+		},
+	}
+
+	server.httpClient = &http.Client{
+		Transport: t,
+		Timeout:   time.Second * 60,
+	}
+
+	request, requestErr := http.NewRequest(method, fullURL, bytes.NewBuffer(jsonString))
+	if requestErr != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", requestErr)
+	}
+
+	request.SetBasicAuth(server.Username, server.Password)
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("X-HTTP-Method-Override", "GET")
+
+	response, _ := server.httpClient.Do(request)
+
+	data, _ := ioutil.ReadAll(response.Body)
+	getError := json.Unmarshal(data, &hosts)
+
+	// fmt.Println(len(hosts.Results))
+
+	if getError != nil {
+
+		return `Host not found: `, getError
+	}
+
+	if len(hosts.Results) != 0 {
+		hostName := hosts.Results[0].Name
+		return hostName, nil
+	}
+
+	return `Hosst not found`, fmt.Errorf("API Error: host not found")
 
 }
