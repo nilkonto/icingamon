@@ -1,7 +1,5 @@
 package iapi
 
-import "time"
-
 /*
 Currently to get something working and that can be refactored there is a lot of duplicate and overlapping decleration. In
 part this is because when a variable is defined it is set to a default value. This has been problematic with having an attrs
@@ -46,17 +44,8 @@ type AWSasgDetails struct {
 
 // AWSec2Details ...
 type AWSec2Details struct {
-	ID         string    `json:"id,omitempty"`
-	DetailType string    `json:"detail-type,omitempty"`
-	Source     string    `json:"source,omitempty"`
-	Account    string    `json:"account,omitempty"`
-	Time       time.Time `json:"time,omitempty"`
-	Region     string    `json:"region,omitempty"`
-	Resources  []string  `json:"resources,omitempty"`
-	Detail     struct {
-		InstanceID string `json:"instance-id,omitempty"`
-		State      string `json:"state,omitempty"`
-	} `json:"detail,omitempty"`
+	InstanceID string `json:"instance-id,omitempty"`
+	State      string `json:"state,omitempty"`
 }
 
 //ServiceStruct stores service results
