@@ -1,5 +1,7 @@
 package iapi
 
+import "time"
+
 /*
 Currently to get something working and that can be refactored there is a lot of duplicate and overlapping decleration. In
 part this is because when a variable is defined it is set to a default value. This has been problematic with having an attrs
@@ -8,6 +10,54 @@ because it would try and set values that are not configurable via the API. i.e. 
 duplicate or near duplicate defintions of structs are being defined but can be revisted and refactored later and test will
 be in place to ensure everything still works.
 */
+
+// AWShostAttrs ...
+type AWShostAttrs struct {
+	Address      string            `json:"address,omitempty"`
+	CheckCommand string            `json:"check_command,omitempty"`
+	DisplayName  string            `json:"display_name,omitempty"`
+	Zone         string            `json:"zone,omitempty"`
+	Vars         map[string]string `json:"vars,omitempty"`
+}
+
+// AWShostStruct ...
+type AWShostStruct struct {
+	Templates []string          `json:"templates,omitempty"`
+	Attrs     map[string]string `json:"attrs,omitempty"`
+}
+
+// AWSasgDetails ...
+type AWSasgDetails struct {
+	Description string `json:"Description,omitempty"`
+	Details     struct {
+		SubnetID         string `json:"Subnet ID,omitempty"`
+		AvailabilityZone string `json:"Availability Zone,omitempty"`
+	} `json:"Details,omitempty"`
+	EndTime              string `json:"EndTime,omitempty"`
+	RequestID            string `json:"RequestId,omitempty"`
+	ActivityID           string `json:"ActivityId,omitempty"`
+	Cause                string `json:"Cause,omitempty"`
+	AutoScalingGroupName string `json:"AutoScalingGroupName,omitempty"`
+	StartTime            string `json:"StartTime,omitempty"`
+	EC2InstanceID        string `json:"EC2InstanceId,omitempty"`
+	StatusCode           string `json:"StatusCode,omitempty"`
+	StatusMessage        string `json:"StatusMessage,omitempty"`
+}
+
+// AWSec2Details ...
+type AWSec2Details struct {
+	ID         string    `json:"id,omitempty"`
+	DetailType string    `json:"detail-type,omitempty"`
+	Source     string    `json:"source,omitempty"`
+	Account    string    `json:"account,omitempty"`
+	Time       time.Time `json:"time,omitempty"`
+	Region     string    `json:"region,omitempty"`
+	Resources  []string  `json:"resources,omitempty"`
+	Detail     struct {
+		InstanceID string `json:"instance-id,omitempty"`
+		State      string `json:"state,omitempty"`
+	} `json:"detail,omitempty"`
+}
 
 //ServiceStruct stores service results
 type ServiceStruct struct {
