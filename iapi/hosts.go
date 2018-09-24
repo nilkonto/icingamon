@@ -75,7 +75,7 @@ func (server *Server) CreateHost(hostname, address, zone, checkCommand string, v
 	var newAttrs HostAttrs
 	newAttrs.Address = address
 	newAttrs.Zone = zone
-	newAttrs.CheckCommand = "hostalive"
+	newAttrs.CheckCommand = checkCommand
 	if variables != nil {
 		newAttrs.Vars = Flatten(variables)
 		//newAttrs.Vars = variables
@@ -110,6 +110,60 @@ func (server *Server) CreateHost(hostname, address, zone, checkCommand string, v
 
 	// Make the API request to create the hosts.
 	results, err := server.NewAPIRequest("PUT", "/objects/hosts/"+hostname, []byte(payloadJSON))
+	if err != nil {
+		return nil, err
+	}
+
+	if results.Code == 200 {
+		hosts, err := server.GetHost(hostname)
+		return hosts, err
+	}
+
+	return nil, fmt.Errorf("%s", results.ErrorString)
+
+}
+
+// Update Host ...
+func (server *Server) UpdateHost(hostname, address, zone, checkCommand string, variables map[string]string, templates []string) ([]HostStruct, error) {
+
+	var newAttrs HostAttrs
+	newAttrs.Address = address
+	newAttrs.Zone = zone
+	newAttrs.CheckCommand = checkCommand
+	if variables != nil {
+		newAttrs.Vars = Flatten(variables)
+		//newAttrs.Vars = variables
+	}
+
+	//newAttrs.Vars = variables
+	//newAttrs.Vars = createKeyValuePairs(variables)
+
+	nhatr, _ := json.Marshal(newAttrs)
+	m := make(map[string]interface{})
+
+	errd := json.Unmarshal(nhatr, &m)
+	if errd != nil {
+
+	}
+
+	var newHost HostStruct
+	newHost.Name = hostname
+	newHost.Type = "Host"
+	newHost.Templates = templates
+	newHost.Attrs = Flatten(m)
+	//newAttrs
+	//newHost.Attrs = newAttrs
+
+	// Create JSON from completed struct
+	payloadJSON, marshalErr := json.Marshal(newHost)
+	if marshalErr != nil {
+		return nil, marshalErr
+	}
+
+	//fmt.Printf("<payload> %s\n", payloadJSON)
+
+	// Make the API request to create the hosts.
+	results, err := server.NewAPIRequest("POST", "/objects/hosts/"+hostname, []byte(payloadJSON))
 	if err != nil {
 		return nil, err
 	}
