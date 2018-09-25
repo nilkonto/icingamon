@@ -118,6 +118,17 @@ type HostStruct struct {
 	Joins struct{}               `json:"stuct,omitempty"`
 }
 
+// HostStructRead is a struct used to store results from an Icinga2 Host API Call. The content are also used to generate the JSON for the CreateHost call
+type HostStructRead struct {
+	Templates []string  `json:"templates,omitempty"`
+	Name      string    `json:"name,omitempty"`
+	Type      string    `json:"type,omitempty"`
+	Attrs     HostAttrs `json:"attrs,omitempty"`
+	//Attrs map[string]interface{} `json:"attrs,omitempty"`
+	Meta  struct{} `json:"meta,omitempty"`
+	Joins struct{} `json:"stuct,omitempty"`
+}
+
 // HostAttrs This is struct lists the attributes that can be set during a CreateHost call. The contents of the struct is converted into JSON
 type HostAttrs struct {
 	ActionURL    string      `json:"action_url,omitempty"`

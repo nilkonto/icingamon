@@ -42,6 +42,33 @@ func (server *Server) GetHost(hostname string) ([]HostStruct, error) {
 
 }
 
+// GetHostTr ...
+func (server *Server) GetHostTr(hostname string) ([]HostStructRead, error) {
+
+	var hosts []HostStructRead
+
+	results, err := server.NewAPIRequest("GET", "/objects/hosts/"+hostname, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Contents of the results is an interface object. Need to convert it to json first.
+	jsonStr, marshalErr := json.Marshal(results.Results)
+	if marshalErr != nil {
+		return nil, marshalErr
+	}
+
+	// then the JSON can be pushed into the appropriate struct.
+	// Note : Results is a slice so much push into a slice.
+
+	if unmarshalErr := json.Unmarshal(jsonStr, &hosts); unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+
+	return hosts, err
+
+}
+
 // DeleteHostByInstanceid ...
 func (server *Server) DeleteHostByInstanceid(intstanceID string) (string, error) {
 
