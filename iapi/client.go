@@ -180,6 +180,6 @@ func (server *Server) NewAPIRequestFiltered(method, APICall string, jsonString [
 		return hostName, nil
 	}
 
-	return `Hosst not found`, fmt.Errorf("API Error: host not found")
+	return `Host not found`, fmt.Errorf("API Error: host not found")
 
 }

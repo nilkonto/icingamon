@@ -63,7 +63,6 @@ func (server *Server) CreateCheckcommand(name, command string, command_arguments
 	}
 
 	return nil, fmt.Errorf("%s", results.ErrorString)
-
 }
 
 // DeleteCheckcommand ...

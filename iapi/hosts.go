@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 // CreateKeyValuePairs ...
@@ -69,63 +70,80 @@ func (server *Server) GetHostTr(hostname string) ([]HostStructRead, error) {
 
 }
 
-// DeleteHostByInstanceid ...
-func (server *Server) DeleteHostByInstanceid(intstanceID string) (string, error) {
+// SetNotifications ...
+func (server *Server) SetNotifications(hostname, enableNotifications string) error {
+	eNotification, err := strconv.ParseBool(enableNotifications)
 
-	payload := map[string]interface{}{
-		"type": "host",
-		// "filter": "host.vars.type==\"AWS\" && host.vars.InstanceId==\"i-0c43eb69dd98ceeac\"",
-		"filter": "host.vars.InstanceId==\"" + intstanceID + "\"",
-	}
-	filterURL := "/objects/hosts?attrs=name"
-	byts, _ := json.Marshal(payload)
+	strBody := fmt.Sprintf(`{ "filter": "regex(hostname, host.name)", "filter_vars": { "hostname": "%s" }, "attrs": { "enable_notifications": %t } }`, hostname, eNotification)
 
-	hostname, getError := server.NewAPIRequestFiltered("POST", filterURL, byts)
-
-	if getError != nil {
-		return "", getError
+	// Make the API request to create the hosts.
+	notificationResp, err := server.NewAPIRequest("POST", "/objects/services", []byte(strBody))
+	if err != nil {
+		return err
 	}
 
-	delerr := server.DeleteHost(hostname)
-	if delerr != nil {
-		return `Host : ` + hostname + ` couldn't be removed from monitoring.`, delerr
-		//fmt.Println("host not deleted. Error: ", delerr)
+	if notificationResp.Code != 200 {
+		return err
 	}
 
-	return `Host : ` + hostname + ` removed from monitoring`, nil
-
+	return nil
 }
 
 // CreateHost ...
-func (server *Server) CreateHost(hostname, address, zone, checkCommand string, variables map[string]string, templates []string) ([]HostStruct, error) {
+func (server *Server) CreateHost(hostname, address, zone, checkCommand, checkPeriod, actionURL, notesURL, notes, volatile, enableActiveChecks, enableNotifications string, variables map[string]string, templates []string) ([]HostStruct, error) {
 
 	var newAttrs HostAttrs
 	newAttrs.Address = address
 	newAttrs.Zone = zone
 	newAttrs.CheckCommand = checkCommand
+
 	if variables != nil {
 		newAttrs.Vars = Flatten(variables)
-		//newAttrs.Vars = variables
 	}
 
-	//newAttrs.Vars = variables
-	//newAttrs.Vars = createKeyValuePairs(variables)
+	if actionURL != "" {
+		newAttrs.ActionURL = actionURL
+	}
 
-	nhatr, _ := json.Marshal(newAttrs)
-	m := make(map[string]interface{})
+	if notesURL != "" {
+		newAttrs.NotesURL = notesURL
+	}
 
-	errd := json.Unmarshal(nhatr, &m)
-	if errd != nil {
+	if notes != "" {
+		newAttrs.Notes = notes
+	}
 
+	newAttrs.EnableNotifications = enableNotifications
+
+	if enableActiveChecks != "" {
+		newAttrs.EnableActiveChecks, _ = strconv.ParseBool(enableActiveChecks)
+	}
+
+	if volatile != "" {
+		newAttrs.Volatile, _ = strconv.ParseBool(volatile)
+	}
+
+	if checkPeriod != "" {
+		newAttrs.CheckPeriod = checkPeriod
+	}
+
+	newAttrsMarshalled, marshalErr := json.Marshal(newAttrs)
+	if marshalErr != nil {
+		return nil, marshalErr
+	}
+
+	cleanedHostAttrs := make(map[string]interface{})
+
+	unmarshalErr := json.Unmarshal(newAttrsMarshalled, &cleanedHostAttrs)
+	if unmarshalErr != nil {
+		return nil, unmarshalErr
 	}
 
 	var newHost HostStruct
 	newHost.Name = hostname
 	newHost.Type = "Host"
 	newHost.Templates = templates
-	newHost.Attrs = Flatten(m)
-	//newAttrs
-	//newHost.Attrs = newAttrs
+	newHost.Attrs = Flatten(cleanedHostAttrs)
 
 	// Create JSON from completed struct
 	payloadJSON, marshalErr := json.Marshal(newHost)
@@ -133,7 +151,7 @@ func (server *Server) CreateHost(hostname, address, zone, checkCommand string, v
 		return nil, marshalErr
 	}
 
-	//fmt.Printf("<payload> %s\n", payloadJSON)
+	fmt.Printf("<payload> %s\n", payloadJSON)
 
 	// Make the API request to create the hosts.
 	results, err := server.NewAPIRequest("PUT", "/objects/hosts/"+hostname, []byte(payloadJSON))
@@ -150,36 +168,61 @@ func (server *Server) CreateHost(hostname, address, zone, checkCommand string, v
 
 }
 
-// Update Host ...
-func (server *Server) UpdateHost(hostname, address, zone, checkCommand string, variables map[string]string, templates []string) ([]HostStruct, error) {
+// UpdateHost ...
+func (server *Server) UpdateHost(hostname, address, zone, checkCommand, checkPeriod, actionURL, notesURL, notes, volatile, enableActiveChecks, enableNotifications string, variables map[string]string, templates []string) ([]HostStruct, error) {
 
 	var newAttrs HostAttrs
 	newAttrs.Address = address
 	newAttrs.Zone = zone
 	newAttrs.CheckCommand = checkCommand
+
 	if variables != nil {
 		newAttrs.Vars = Flatten(variables)
-		//newAttrs.Vars = variables
 	}
 
-	//newAttrs.Vars = variables
-	//newAttrs.Vars = createKeyValuePairs(variables)
+	if actionURL != "" {
+		newAttrs.ActionURL = actionURL
+	}
 
-	nhatr, _ := json.Marshal(newAttrs)
-	m := make(map[string]interface{})
+	if notesURL != "" {
+		newAttrs.NotesURL = notesURL
+	}
 
-	errd := json.Unmarshal(nhatr, &m)
-	if errd != nil {
+	if notes != "" {
+		newAttrs.Notes = notes
+	}
 
+	newAttrs.EnableNotifications = enableNotifications
+
+	if enableActiveChecks != "" {
+		newAttrs.EnableActiveChecks, _ = strconv.ParseBool(enableActiveChecks)
+	}
+
+	if volatile != "" {
+		newAttrs.Volatile, _ = strconv.ParseBool(volatile)
+	}
+
+	if checkPeriod != "" {
+		newAttrs.CheckPeriod = checkPeriod
+	}
+
+	newAttrsMarshalled, marshalErr := json.Marshal(newAttrs)
+	if marshalErr != nil {
+		return nil, marshalErr
+	}
+
+	cleanedHostAttrs := make(map[string]interface{})
+
+	unmarshalErr := json.Unmarshal(newAttrsMarshalled, &cleanedHostAttrs)
+	if unmarshalErr != nil {
+		return nil, unmarshalErr
 	}
 
 	var newHost HostStruct
 	newHost.Name = hostname
 	newHost.Type = "Host"
 	newHost.Templates = templates
-	newHost.Attrs = Flatten(m)
-	//newAttrs
-	//newHost.Attrs = newAttrs
+	newHost.Attrs = Flatten(cleanedHostAttrs)
 
 	// Create JSON from completed struct
 	payloadJSON, marshalErr := json.Marshal(newHost)
@@ -187,7 +230,7 @@ func (server *Server) UpdateHost(hostname, address, zone, checkCommand string, v
 		return nil, marshalErr
 	}
 
-	//fmt.Printf("<payload> %s\n", payloadJSON)
+	//fmt.Printf("<payload> %s\n", payloadJSON) // for debugging purposes
 
 	// Make the API request to create the hosts.
 	results, err := server.NewAPIRequest("POST", "/objects/hosts/"+hostname, []byte(payloadJSON))
@@ -217,5 +260,4 @@ func (server *Server) DeleteHost(hostname string) error {
 	} else {
 		return fmt.Errorf("%s", results.ErrorString)
 	}
-
 }

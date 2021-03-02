@@ -5,50 +5,11 @@ Currently to get something working and that can be refactored there is a lot of 
 part this is because when a variable is defined it is set to a default value. This has been problematic with having an attrs
 struct that has all the variables. That struct then cannot be used to create the JSON for the create, without modification,
 because it would try and set values that are not configurable via the API. i.e. for hosts "LastCheck" So to keep things moving
-duplicate or near duplicate defintions of structs are being defined but can be revisted and refactored later and test will
+duplicate or near duplicate defintions of structs are being defined but can be revisited and refactored later and test will
 be in place to ensure everything still works.
 */
 
-// AWShostAttrs ...
-type AWShostAttrs struct {
-	Address      string            `json:"address,omitempty"`
-	CheckCommand string            `json:"check_command,omitempty"`
-	DisplayName  string            `json:"display_name,omitempty"`
-	Zone         string            `json:"zone,omitempty"`
-	Vars         map[string]string `json:"vars,omitempty"`
-}
-
-// AWShostStruct ...
-type AWShostStruct struct {
-	Templates []string          `json:"templates,omitempty"`
-	Attrs     map[string]string `json:"attrs,omitempty"`
-}
-
-// AWSasgDetails ...
-type AWSasgDetails struct {
-	Description string `json:"Description,omitempty"`
-	Details     struct {
-		SubnetID         string `json:"Subnet ID,omitempty"`
-		AvailabilityZone string `json:"Availability Zone,omitempty"`
-	} `json:"Details,omitempty"`
-	EndTime              string `json:"EndTime,omitempty"`
-	RequestID            string `json:"RequestId,omitempty"`
-	ActivityID           string `json:"ActivityId,omitempty"`
-	Cause                string `json:"Cause,omitempty"`
-	AutoScalingGroupName string `json:"AutoScalingGroupName,omitempty"`
-	StartTime            string `json:"StartTime,omitempty"`
-	EC2InstanceID        string `json:"EC2InstanceId,omitempty"`
-	StatusCode           string `json:"StatusCode,omitempty"`
-	StatusMessage        string `json:"StatusMessage,omitempty"`
-}
-
-// AWSec2Details ...
-type AWSec2Details struct {
-	InstanceID string `json:"instance-id,omitempty"`
-	State      string `json:"state,omitempty"`
-}
-
-//ServiceStruct stores service results
+// ServiceStruct ... stores service results
 type ServiceStruct struct {
 	Attrs ServiceAttrs `json:"attrs"`
 	Joins struct{}     `json:"joins"`
@@ -57,12 +18,13 @@ type ServiceStruct struct {
 	Type string `json:"type"`
 }
 
+// ServiceAttrs ...
 type ServiceAttrs struct {
 	CheckCommand string `json:"check_command"`
 	//	CheckInterval float64       `json:"check_interval"`
 	//	DisplayName   string        `json:"display_name"`
 	//	Groups        []interface{} `json:"groups"`
-	//Name string `json:"name"`
+	//	Name string `json:"name"`
 	//	Templates     []string      `json:"templates"`
 	//	Type string `json:"type"`
 	//	Vars          interface{}   `json:"vars"`
@@ -77,6 +39,7 @@ type CheckcommandStruct struct {
 	Meta  struct{}          `json:"meta"`
 }
 
+// CheckcommandAttrs ...
 type CheckcommandAttrs struct {
 	Arguments interface{} `json:"arguments"`
 	Command   []string    `json:"command"`
@@ -109,38 +72,60 @@ type HostgroupAttrs struct {
 
 // HostStruct is a struct used to store results from an Icinga2 Host API Call. The content are also used to generate the JSON for the CreateHost call
 type HostStruct struct {
-	Templates []string `json:"templates,omitempty"`
-	Name      string   `json:"name,omitempty"`
-	Type      string   `json:"type,omitempty"`
-	//Attrs     HostAttrs `json:"attrs,omitempty"`
-	Attrs map[string]interface{} `json:"attrs,omitempty"`
-	Meta  struct{}               `json:"meta,omitempty"`
-	Joins struct{}               `json:"stuct,omitempty"`
+	Templates []string               `json:"templates,omitempty"`
+	Name      string                 `json:"name,omitempty"`
+	Type      string                 `json:"type,omitempty"`
+	Attrs     map[string]interface{} `json:"attrs,omitempty"`
+	Meta      struct{}               `json:"meta,omitempty"`
+	Joins     struct{}               `json:"stuct,omitempty"`
 }
 
 // HostStructRead is a struct used to store results from an Icinga2 Host API Call. The content are also used to generate the JSON for the CreateHost call
 type HostStructRead struct {
-	Templates []string  `json:"templates,omitempty"`
-	Name      string    `json:"name,omitempty"`
-	Type      string    `json:"type,omitempty"`
-	Attrs     HostAttrs `json:"attrs,omitempty"`
-	//Attrs map[string]interface{} `json:"attrs,omitempty"`
-	Meta  struct{} `json:"meta,omitempty"`
-	Joins struct{} `json:"stuct,omitempty"`
+	Templates []string      `json:"templates,omitempty"`
+	Name      string        `json:"name,omitempty"`
+	Type      string        `json:"type,omitempty"`
+	Attrs     HostAttrsRead `json:"attrs,omitempty"`
+	Meta      struct{}      `json:"meta,omitempty"`
+	Joins     struct{}      `json:"stuct,omitempty"`
 }
 
 // HostAttrs This is struct lists the attributes that can be set during a CreateHost call. The contents of the struct is converted into JSON
 type HostAttrs struct {
-	ActionURL    string      `json:"action_url,omitempty"`
-	Address      string      `json:"address,omitempty"`
-	Address6     string      `json:"address6,omitempty"`
-	CheckCommand string      `json:"check_command,omitempty"`
-	DisplayName  string      `json:"display_name,omitempty"`
-	Groups       []string    `json:"groups,omitempty"`
-	Zone         string      `json:"zone,omitempty"`
-	Notes        string      `json:"notes,omitempty"`
-	NotesURL     string      `json:"notes_url,omitempty"`
-	Vars         interface{} `json:"vars,omitempty"`
+	ActionURL           string      `json:"action_url,omitempty"`
+	Address             string      `json:"address,omitempty"`
+	Address6            string      `json:"address6,omitempty"`
+	CheckCommand        string      `json:"check_command,omitempty"`
+	CheckInterval       int         `json:"check_interval,omitempty"`
+	CheckPeriod         string      `json:"check_period,omitempty"`
+	DisplayName         string      `json:"display_name,omitempty"`
+	EnableActiveChecks  bool        `json:"enable_active_checks,omitempty"`
+	EnableNotifications string      `json:"enable_notifications,omitempty"`
+	Groups              []string    `json:"groups,omitempty"`
+	Notes               string      `json:"notes,omitempty"`
+	NotesURL            string      `json:"notes_url,omitempty"`
+	Vars                interface{} `json:"vars,omitempty"`
+	Volatile            bool        `json:"volatile,omitempty"`
+	Zone                string      `json:"zone,omitempty"`
+}
+
+// HostAttrsRead This is struct lists the attributes that can be set during a CreateHost call. The contents of the struct is converted into JSON
+type HostAttrsRead struct {
+	ActionURL           string      `json:"action_url,omitempty"`
+	Address             string      `json:"address,omitempty"`
+	Address6            string      `json:"address6,omitempty"`
+	CheckCommand        string      `json:"check_command,omitempty"`
+	CheckInterval       int         `json:"check_interval,omitempty"`
+	CheckPeriod         string      `json:"check_period,omitempty"`
+	DisplayName         string      `json:"display_name,omitempty"`
+	EnableActiveChecks  bool        `json:"enable_active_checks,omitempty"`
+	EnableNotifications bool        `json:"enable_notifications,omitempty"`
+	Groups              []string    `json:"groups,omitempty"`
+	Notes               string      `json:"notes,omitempty"`
+	NotesURL            string      `json:"notes_url,omitempty"`
+	Vars                interface{} `json:"vars,omitempty"`
+	Volatile            bool        `json:"volatile,omitempty"`
+	Zone                string      `json:"zone,omitempty"`
 }
 
 // APIResult Stores the results from NewApiRequest

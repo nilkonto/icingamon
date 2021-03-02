@@ -7,7 +7,6 @@ import (
 )
 
 // GetHostgroup ...
-//
 func (server *Server) GetHostgroup(name string) ([]HostgroupStruct, error) {
 
 	var hostgroups []HostgroupStruct
